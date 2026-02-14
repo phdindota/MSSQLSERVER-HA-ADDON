@@ -1,5 +1,18 @@
 # Changelog
 
+## 1.2.0
+
+### Added
+- **ODBC Driver 17 & 18**: Installed Microsoft ODBC Driver 17 and 18 for SQL Server, enabling ODBC-based connections from applications and scripts
+- **Command-Line Tools**: Added `sqlcmd` and `bcp` utilities (both v17 and v18) for direct database management from within the container
+- **unixodbc-dev**: Included ODBC development headers for building ODBC applications
+- **PATH Configuration**: Added `/opt/mssql-tools18/bin` and `/opt/mssql-tools/bin` to PATH for easy access to sqlcmd and bcp
+
+### Documentation
+- Updated DOCS.md with comprehensive ODBC driver information and usage examples
+- Added sqlcmd and bcp usage examples for both interactive and automated scenarios
+- Updated README.md to highlight included ODBC drivers and command-line tools
+
 ## 1.1.0
 
 ### Fixed
