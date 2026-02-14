@@ -317,14 +317,16 @@ connect();
 
 ### Storage Directories
 
-All SQL Server data is stored in the Home Assistant `/share` directory, ensuring persistence across restarts, updates, and reinstalls.
+All SQL Server data, **including the master system database**, is stored in the Home Assistant `/share` directory, ensuring persistence across restarts, updates, and reinstalls.
 
 Default locations:
 ```
-/share/mssqlserver/data/     - Database files (.mdf, .ndf)
-/share/mssqlserver/log/      - Transaction logs (.ldf)
+/share/mssqlserver/data/     - Database files (.mdf, .ndf), including master.mdf
+/share/mssqlserver/log/      - Transaction logs (.ldf), including mastlog.ldf
 /share/mssqlserver/backup/   - Backup files (.bak)
 ```
+
+**Important**: The master database is now persisted to the `/share` volume, which means SQL Server will remember all your user databases even after Home Assistant or the add-on restarts. Previously, the master database was stored in the container's ephemeral storage, causing databases to appear to "disappear" after restarts.
 
 ### Accessing Files
 

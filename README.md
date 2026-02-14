@@ -152,13 +152,13 @@ conn = pyodbc.connect(
 
 ## Data Persistence
 
-All SQL Server data is stored in the Home Assistant `/share/mssqlserver` directory by default:
+All SQL Server data, **including the master system database**, is stored in the Home Assistant `/share/mssqlserver` directory by default:
 
-- **Data files**: `/share/mssqlserver/data`
-- **Log files**: `/share/mssqlserver/log`
+- **Data files**: `/share/mssqlserver/data` (includes `master.mdf`)
+- **Log files**: `/share/mssqlserver/log` (includes `mastlog.ldf`)
 - **Backups**: `/share/mssqlserver/backup`
 
-This ensures your databases persist across add-on restarts and updates. You can access these directories from the Home Assistant file system.
+This ensures your databases persist across add-on restarts and updates. The master database, which tracks all user databases, is now stored in persistent storage, so your databases will survive Home Assistant restarts. You can access these directories from the Home Assistant file system.
 
 ## Important Notes
 
