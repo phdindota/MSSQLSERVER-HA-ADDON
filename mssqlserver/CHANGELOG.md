@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.2.1
+
+### Fixed
+- **Docker Build**: Fixed Docker build failure with `gpg: cannot open '/dev/tty': No such device or address` by adding `--batch --yes` flags to the `gpg --dearmor` command for non-interactive execution
+
 ## 1.2.0
 
 ### Added
