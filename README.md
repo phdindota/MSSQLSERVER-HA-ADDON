@@ -8,6 +8,8 @@ Run Microsoft SQL Server 2025 as a containerized service within Home Assistant O
 - **Multiple Editions** - Support for Developer, Express, Standard, and Enterprise editions
 - **Persistent Storage** - Data stored in Home Assistant's `/share` directory for persistence across restarts
 - **Easy Configuration** - Simple YAML-based configuration through Home Assistant UI
+- **ODBC Drivers Included** - Microsoft ODBC Driver 17 & 18 for SQL Server connectivity
+- **Command-Line Tools** - `sqlcmd` and `bcp` utilities (v17 and v18) for database management
 - **amd64 Architecture** - Optimized for x86-64 systems (SQL Server does not support ARM architectures)
 
 ## Installation
@@ -126,6 +128,18 @@ Once the add-on is running, you can connect to SQL Server on port **1433**.
 
 ### Using sqlcmd (Command Line)
 
+**Note**: This add-on includes `sqlcmd` v17 and v18. You can use either version from within the container.
+
+**From within the add-on container**:
+```bash
+# Using sqlcmd v18 (recommended)
+sqlcmd -S localhost -U sa -P 'YourPassword' -Q "SELECT name FROM sys.databases"
+
+# Interactive mode
+sqlcmd -S localhost -U sa -P 'YourPassword'
+```
+
+**From your local machine**:
 ```bash
 sqlcmd -S homeassistant.local,1433 -U sa -P 'YourPassword'
 ```
