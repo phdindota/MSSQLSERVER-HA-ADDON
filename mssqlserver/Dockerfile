@@ -8,7 +8,24 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     curl \
     jq \
     gosu \
+    gnupg2 \
+    apt-transport-https \
     && rm -rf /var/lib/apt/lists/*
+
+# Install Microsoft ODBC Driver 17 & 18 for SQL Server
+RUN curl -fsSL https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor -o /usr/share/keyrings/microsoft-prod.gpg \
+    && curl -fsSL https://packages.microsoft.com/config/ubuntu/22.04/prod.list | tee /etc/apt/sources.list.d/mssql-release.list \
+    && apt-get update \
+    && ACCEPT_EULA=Y apt-get install -y --no-install-recommends \
+        msodbcsql17 \
+        msodbcsql18 \
+        mssql-tools \
+        mssql-tools18 \
+        unixodbc-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+# Add sqlcmd and bcp to PATH
+ENV PATH="$PATH:/opt/mssql-tools18/bin:/opt/mssql-tools/bin"
 
 # Install bashio for Home Assistant integration
 RUN mkdir -p /usr/lib/bashio \
