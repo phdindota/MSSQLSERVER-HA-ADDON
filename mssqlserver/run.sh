@@ -5,6 +5,9 @@ set -e
 # MS SQL Server 2025 Add-on - Startup Script
 # ==============================================================================
 
+# Source bashio library for Home Assistant integration
+source /usr/lib/bashio/bashio.sh
+
 # Get current user ID for error messages
 CURRENT_UID=$(id -u)
 
@@ -49,10 +52,10 @@ fi
 
 # Check password complexity (must contain at least 3 of: uppercase, lowercase, digits, symbols)
 complexity_count=0
-[[ "${SA_PASSWORD}" =~ [A-Z] ]] && ((complexity_count++))
-[[ "${SA_PASSWORD}" =~ [a-z] ]] && ((complexity_count++))
-[[ "${SA_PASSWORD}" =~ [0-9] ]] && ((complexity_count++))
-[[ "${SA_PASSWORD}" =~ [^a-zA-Z0-9] ]] && ((complexity_count++))
+[[ "${SA_PASSWORD}" =~ [A-Z] ]] && complexity_count=$((complexity_count + 1))
+[[ "${SA_PASSWORD}" =~ [a-z] ]] && complexity_count=$((complexity_count + 1))
+[[ "${SA_PASSWORD}" =~ [0-9] ]] && complexity_count=$((complexity_count + 1))
+[[ "${SA_PASSWORD}" =~ [^a-zA-Z0-9] ]] && complexity_count=$((complexity_count + 1))
 
 if [ ${complexity_count} -lt 3 ]; then
     bashio::log.error "SA password does not meet complexity requirements."
