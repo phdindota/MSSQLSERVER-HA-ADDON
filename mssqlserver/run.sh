@@ -5,6 +5,9 @@ set -e
 # MS SQL Server 2025 Add-on - Startup Script
 # ==============================================================================
 
+# Get current user ID for error messages
+CURRENT_UID=$(id -u)
+
 bashio::log.info "Starting MS SQL Server 2025 add-on..."
 
 # ==============================================================================
@@ -72,7 +75,7 @@ if [ ! -d "${MSSQL_DATA_DIR}" ]; then
     bashio::log.info "Creating data directory: ${MSSQL_DATA_DIR}"
     if ! mkdir -p "${MSSQL_DATA_DIR}" 2>/dev/null; then
         bashio::log.error "Failed to create data directory: ${MSSQL_DATA_DIR}"
-        bashio::log.error "Please ensure the /share directory has correct permissions for the mssql user (UID 10001)"
+        bashio::log.error "Please ensure the /share directory has correct permissions for the mssql user (UID ${CURRENT_UID})"
         bashio::exit.nok "Failed to create data directory"
     fi
 fi
@@ -81,7 +84,7 @@ if [ ! -d "${MSSQL_LOG_DIR}" ]; then
     bashio::log.info "Creating log directory: ${MSSQL_LOG_DIR}"
     if ! mkdir -p "${MSSQL_LOG_DIR}" 2>/dev/null; then
         bashio::log.error "Failed to create log directory: ${MSSQL_LOG_DIR}"
-        bashio::log.error "Please ensure the /share directory has correct permissions for the mssql user (UID 10001)"
+        bashio::log.error "Please ensure the /share directory has correct permissions for the mssql user (UID ${CURRENT_UID})"
         bashio::exit.nok "Failed to create log directory"
     fi
 fi
@@ -90,7 +93,7 @@ if [ ! -d "${MSSQL_BACKUP_DIR}" ]; then
     bashio::log.info "Creating backup directory: ${MSSQL_BACKUP_DIR}"
     if ! mkdir -p "${MSSQL_BACKUP_DIR}" 2>/dev/null; then
         bashio::log.error "Failed to create backup directory: ${MSSQL_BACKUP_DIR}"
-        bashio::log.error "Please ensure the /share directory has correct permissions for the mssql user (UID 10001)"
+        bashio::log.error "Please ensure the /share directory has correct permissions for the mssql user (UID ${CURRENT_UID})"
         bashio::exit.nok "Failed to create backup directory"
     fi
 fi
