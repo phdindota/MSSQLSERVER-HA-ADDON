@@ -229,6 +229,11 @@ Azure Data Studio is a cross-platform SQL Server management tool (Windows, macOS
 
 sqlcmd is included with SQL Server and available separately as a cross-platform tool. **This add-on includes both sqlcmd v17 and v18**, which are accessible from within the add-on container.
 
+**⚠️ Security Note**: The examples below show passwords on the command line for simplicity. In production environments, avoid exposing passwords in command history by:
+- Using environment variables: `sqlcmd -S localhost -U sa -P "$SA_PASSWORD"`
+- Omitting `-P` to prompt interactively: `sqlcmd -S localhost -U sa` (then enter password when prompted)
+- Using configuration files with restricted permissions
+
 **From within the add-on container** (using Terminal add-on or `docker exec`):
 ```bash
 # Using sqlcmd v18 (recommended - latest version with enhanced features)
