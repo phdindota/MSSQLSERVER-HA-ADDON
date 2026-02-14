@@ -4,6 +4,11 @@
 
 The MS SQL Server 2025 add-on brings Microsoft's enterprise-grade relational database management system to Home Assistant. This add-on runs SQL Server 2025 in a containerized environment, providing a robust database solution for storing and managing data within your Home Assistant ecosystem.
 
+**Included Tools:**
+- **ODBC Driver 17 & 18** - Microsoft's official ODBC drivers for SQL Server connectivity
+- **sqlcmd & bcp** - Command-line tools for SQL Server management (v17 and v18)
+- **unixodbc-dev** - ODBC development headers for building ODBC applications
+
 ### Key Benefits
 
 - **Enterprise Features**: Full SQL Server 2025 capabilities including T-SQL, stored procedures, triggers, and more
@@ -222,9 +227,21 @@ Azure Data Studio is a cross-platform SQL Server management tool (Windows, macOS
 
 ### sqlcmd (Command Line)
 
-sqlcmd is included with SQL Server and available separately as a cross-platform tool.
+sqlcmd is included with SQL Server and available separately as a cross-platform tool. **This add-on includes both sqlcmd v17 and v18**, which are accessible from within the add-on container.
 
-**Linux/macOS**:
+**From within the add-on container** (using Terminal add-on or `docker exec`):
+```bash
+# Using sqlcmd v18 (recommended - latest version with enhanced features)
+sqlcmd -S localhost -U sa -P 'YourPassword' -Q "SELECT @@VERSION"
+
+# Using sqlcmd v17 (legacy compatibility)
+/opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P 'YourPassword' -Q "SELECT @@VERSION"
+
+# Interactive mode
+sqlcmd -S localhost -U sa -P 'YourPassword'
+```
+
+**From outside the container** (Linux/macOS):
 ```bash
 sqlcmd -S homeassistant.local,1433 -U sa -P 'YourPassword' -C
 ```
@@ -236,13 +253,28 @@ sqlcmd -S homeassistant.local,1433 -U sa -P "YourPassword" -C
 
 The `-C` flag trusts the server certificate (useful for self-signed certificates).
 
+**Using bcp (Bulk Copy Program)**:
+
+The `bcp` utility is also included for bulk data import/export operations:
+
+```bash
+# Export data from a table to a file
+bcp YourDatabase.dbo.YourTable out /share/mssqlserver/backup/data.txt -S localhost -U sa -P 'YourPassword' -c
+
+# Import data from a file to a table
+bcp YourDatabase.dbo.YourTable in /share/mssqlserver/backup/data.txt -S localhost -U sa -P 'YourPassword' -c
+```
+
 ### Programming Language Connections
 
 #### Python (pyodbc)
 
+**Note**: This add-on includes ODBC Driver 17 and 18, so you can use either driver in your connection strings.
+
 ```python
 import pyodbc
 
+# Using ODBC Driver 18 (recommended - latest version)
 connection_string = (
     'DRIVER={ODBC Driver 18 for SQL Server};'
     'SERVER=homeassistant.local,1433;'
@@ -251,6 +283,16 @@ connection_string = (
     'PWD=YourPassword;'
     'TrustServerCertificate=yes;'
 )
+
+# Using ODBC Driver 17 (for compatibility)
+# connection_string = (
+#     'DRIVER={ODBC Driver 17 for SQL Server};'
+#     'SERVER=homeassistant.local,1433;'
+#     'DATABASE=master;'
+#     'UID=sa;'
+#     'PWD=YourPassword;'
+#     'TrustServerCertificate=yes;'
+# )
 
 conn = pyodbc.connect(connection_string)
 cursor = conn.cursor()
@@ -396,9 +438,87 @@ automation:
 shell_command:
   sql_backup: >
     docker exec addon_local_mssqlserver
-    /opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P 'YourPassword'
+    sqlcmd -S localhost -U sa -P 'YourPassword'
     -Q "BACKUP DATABASE YourDB TO DISK='/share/mssqlserver/backup/daily.bak' WITH INIT"
 ```
+
+## ODBC Drivers and Command-Line Tools
+
+This add-on includes Microsoft's official ODBC drivers and command-line tools, enabling direct database access and management from within the container.
+
+### Included Components
+
+| Component | Version | Description |
+|-----------|---------|-------------|
+| **ODBC Driver 17** | msodbcsql17 | Widely used, stable ODBC driver for SQL Server |
+| **ODBC Driver 18** | msodbcsql18 | Latest ODBC driver with TLS encryption by default |
+| **mssql-tools** | v17 | Command-line tools: `sqlcmd` and `bcp` (v17) |
+| **mssql-tools18** | v18 | Command-line tools: `sqlcmd` and `bcp` (v18) |
+| **unixodbc-dev** | Latest | ODBC development headers for building applications |
+
+### Using sqlcmd from the Container
+
+You can execute SQL queries directly from within the add-on container using `sqlcmd`:
+
+**Access the container terminal** (via Terminal add-on or SSH):
+```bash
+docker exec -it addon_local_mssqlserver bash
+```
+
+**Run queries**:
+```bash
+# List all databases
+sqlcmd -S localhost -U sa -P 'YourPassword' -Q "SELECT name FROM sys.databases"
+
+# Create a new database
+sqlcmd -S localhost -U sa -P 'YourPassword' -Q "CREATE DATABASE MyNewDB"
+
+# Run a SQL script
+sqlcmd -S localhost -U sa -P 'YourPassword' -i /share/mssqlserver/backup/script.sql
+
+# Interactive mode
+sqlcmd -S localhost -U sa -P 'YourPassword'
+```
+
+### Using bcp for Bulk Operations
+
+The `bcp` (Bulk Copy Program) utility allows you to efficiently import and export large amounts of data:
+
+```bash
+# Export table data to CSV
+bcp "SELECT * FROM MyDatabase.dbo.MyTable" queryout /share/mssqlserver/backup/export.csv -S localhost -U sa -P 'YourPassword' -c -t,
+
+# Import data from CSV to table
+bcp MyDatabase.dbo.MyTable in /share/mssqlserver/backup/data.csv -S localhost -U sa -P 'YourPassword' -c -t,
+
+# Export with native format (faster, preserves data types)
+bcp MyDatabase.dbo.MyTable out /share/mssqlserver/backup/data.bcp -S localhost -U sa -P 'YourPassword' -n
+```
+
+### ODBC Connection Strings
+
+When connecting from applications, you can use either ODBC Driver 17 or 18:
+
+**ODBC Driver 18** (recommended - latest with enhanced security):
+```
+DRIVER={ODBC Driver 18 for SQL Server};SERVER=homeassistant.local,1433;DATABASE=master;UID=sa;PWD=YourPassword;TrustServerCertificate=yes;
+```
+
+**ODBC Driver 17** (for compatibility):
+```
+DRIVER={ODBC Driver 17 for SQL Server};SERVER=homeassistant.local,1433;DATABASE=master;UID=sa;PWD=YourPassword;TrustServerCertificate=yes;
+```
+
+### Tool Locations
+
+The command-line tools are installed in the following locations and added to PATH:
+
+- **sqlcmd v18**: `/opt/mssql-tools18/bin/sqlcmd`
+- **bcp v18**: `/opt/mssql-tools18/bin/bcp`
+- **sqlcmd v17**: `/opt/mssql-tools/bin/sqlcmd`
+- **bcp v17**: `/opt/mssql-tools/bin/bcp`
+
+You can call `sqlcmd` or `bcp` directly without specifying the full path as they are in the system PATH.
 
 ## Troubleshooting
 
