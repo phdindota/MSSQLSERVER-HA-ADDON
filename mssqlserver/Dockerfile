@@ -12,20 +12,18 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     apt-transport-https \
     && rm -rf /var/lib/apt/lists/*
 
-# Install Microsoft ODBC Driver 17 & 18 for SQL Server
-RUN curl -fsSL https://packages.microsoft.com/keys/microsoft.asc | gpg --batch --yes --dearmor -o /usr/share/keyrings/microsoft-prod.gpg \
-    && echo "deb [arch=amd64 signed-by=/usr/share/keyrings/microsoft-prod.gpg] https://packages.microsoft.com/ubuntu/24.04/prod noble main" > /etc/apt/sources.list.d/mssql-release.list \
-    && apt-get update \
+# Install Microsoft ODBC Driver 18 for SQL Server
+# The base image already includes the Microsoft APT repository (microsoft-prod.list)
+# Note: ODBC Driver 17 is not available for Ubuntu 24.04, only Driver 18
+RUN apt-get update \
     && ACCEPT_EULA=Y apt-get install -y --no-install-recommends \
-        msodbcsql17 \
         msodbcsql18 \
-        mssql-tools \
         mssql-tools18 \
         unixodbc-dev \
     && rm -rf /var/lib/apt/lists/*
 
 # Add sqlcmd and bcp to PATH
-ENV PATH="$PATH:/opt/mssql-tools18/bin:/opt/mssql-tools/bin"
+ENV PATH="$PATH:/opt/mssql-tools18/bin"
 
 # Install bashio for Home Assistant integration
 RUN mkdir -p /usr/lib/bashio \

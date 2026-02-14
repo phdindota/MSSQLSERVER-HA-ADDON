@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.2.3
+
+### Fixed
+- **Docker Build**: Fixed ODBC driver installation by simplifying to use only Driver 18 packages (msodbcsql18, mssql-tools18) which are available in Ubuntu 24.04. Removed GPG key import and duplicate repository configuration since the base image already includes microsoft-prod.list. Driver 17 packages are no longer available in the Ubuntu 24.04 repository.
+
+### Changed
+- **ODBC Drivers**: Now includes only ODBC Driver 18 for SQL Server (Driver 17 is not available for Ubuntu 24.04)
+- **Command-Line Tools**: Now includes only mssql-tools18 (v17 tools are not available for Ubuntu 24.04)
+
 ## 1.2.2
 
 ### Fixed
