@@ -8,9 +8,6 @@ set -e
 # Source bashio library for Home Assistant integration
 source /usr/lib/bashio/bashio.sh
 
-# Get current user ID for error messages
-CURRENT_UID=$(id -u)
-
 bashio::log.info "Starting MS SQL Server 2025 add-on..."
 
 # ==============================================================================
@@ -70,35 +67,39 @@ fi
 bashio::log.info "SA password validated successfully"
 
 # ==============================================================================
-# Create data directories if they don't exist
+# Create data directories (running as root so we have permissions)
 # ==============================================================================
 bashio::log.info "Creating data directories..."
 
-if [ ! -d "${MSSQL_DATA_DIR}" ]; then
-    bashio::log.info "Creating data directory: ${MSSQL_DATA_DIR}"
-    if ! mkdir -p "${MSSQL_DATA_DIR}" 2>/dev/null; then
-        bashio::log.error "Failed to create data directory: ${MSSQL_DATA_DIR}"
-        bashio::log.error "Please ensure the /share directory has correct permissions for the mssql user (UID ${CURRENT_UID})"
-        bashio::exit.nok "Failed to create data directory"
-    fi
+if ! mkdir -p "${MSSQL_DATA_DIR}"; then
+    bashio::log.error "Failed to create data directory: ${MSSQL_DATA_DIR}"
+    bashio::exit.nok "Failed to create data directory"
 fi
 
-if [ ! -d "${MSSQL_LOG_DIR}" ]; then
-    bashio::log.info "Creating log directory: ${MSSQL_LOG_DIR}"
-    if ! mkdir -p "${MSSQL_LOG_DIR}" 2>/dev/null; then
-        bashio::log.error "Failed to create log directory: ${MSSQL_LOG_DIR}"
-        bashio::log.error "Please ensure the /share directory has correct permissions for the mssql user (UID ${CURRENT_UID})"
-        bashio::exit.nok "Failed to create log directory"
-    fi
+if ! mkdir -p "${MSSQL_LOG_DIR}"; then
+    bashio::log.error "Failed to create log directory: ${MSSQL_LOG_DIR}"
+    bashio::exit.nok "Failed to create log directory"
 fi
 
-if [ ! -d "${MSSQL_BACKUP_DIR}" ]; then
-    bashio::log.info "Creating backup directory: ${MSSQL_BACKUP_DIR}"
-    if ! mkdir -p "${MSSQL_BACKUP_DIR}" 2>/dev/null; then
-        bashio::log.error "Failed to create backup directory: ${MSSQL_BACKUP_DIR}"
-        bashio::log.error "Please ensure the /share directory has correct permissions for the mssql user (UID ${CURRENT_UID})"
-        bashio::exit.nok "Failed to create backup directory"
-    fi
+if ! mkdir -p "${MSSQL_BACKUP_DIR}"; then
+    bashio::log.error "Failed to create backup directory: ${MSSQL_BACKUP_DIR}"
+    bashio::exit.nok "Failed to create backup directory"
+fi
+
+# Set ownership to mssql user (UID 10001) so sqlservr can read/write
+if ! chown -R mssql:root "${MSSQL_DATA_DIR}"; then
+    bashio::log.error "Failed to set ownership on data directory: ${MSSQL_DATA_DIR}"
+    bashio::exit.nok "Failed to set directory ownership"
+fi
+
+if ! chown -R mssql:root "${MSSQL_LOG_DIR}"; then
+    bashio::log.error "Failed to set ownership on log directory: ${MSSQL_LOG_DIR}"
+    bashio::exit.nok "Failed to set directory ownership"
+fi
+
+if ! chown -R mssql:root "${MSSQL_BACKUP_DIR}"; then
+    bashio::log.error "Failed to set ownership on backup directory: ${MSSQL_BACKUP_DIR}"
+    bashio::exit.nok "Failed to set directory ownership"
 fi
 
 bashio::log.info "Data directories created successfully"
@@ -123,9 +124,9 @@ bashio::log.info "  Log directory: ${MSSQL_LOG_DIR}"
 bashio::log.info "  Backup directory: ${MSSQL_BACKUP_DIR}"
 bashio::log.info "  Port: 1433"
 bashio::log.info ""
-bashio::log.info "Starting SQL Server..."
+bashio::log.info "Starting SQL Server as mssql user..."
 
 # ==============================================================================
-# Start SQL Server
+# Start SQL Server as mssql user (drop privileges from root)
 # ==============================================================================
-exec /opt/mssql/bin/sqlservr
+exec gosu mssql /opt/mssql/bin/sqlservr
