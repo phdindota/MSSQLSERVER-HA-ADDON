@@ -113,6 +113,8 @@ export MSSQL_PID="${MSSQL_PID}"
 export MSSQL_DATA_DIR="${MSSQL_DATA_DIR}"
 export MSSQL_LOG_DIR="${MSSQL_LOG_DIR}"
 export MSSQL_BACKUP_DIR="${MSSQL_BACKUP_DIR}"
+export MSSQL_MASTER_DATA_FILE="${MSSQL_DATA_DIR}/master.mdf"
+export MSSQL_MASTER_LOG_FILE="${MSSQL_LOG_DIR}/mastlog.ldf"
 
 # ==============================================================================
 # Log startup information
@@ -122,6 +124,8 @@ bashio::log.info "  Edition: ${MSSQL_PID}"
 bashio::log.info "  Data directory: ${MSSQL_DATA_DIR}"
 bashio::log.info "  Log directory: ${MSSQL_LOG_DIR}"
 bashio::log.info "  Backup directory: ${MSSQL_BACKUP_DIR}"
+bashio::log.info "  Master data file: ${MSSQL_MASTER_DATA_FILE}"
+bashio::log.info "  Master log file: ${MSSQL_MASTER_LOG_FILE}"
 bashio::log.info "  Port: 1433"
 bashio::log.info ""
 bashio::log.info "Starting SQL Server as mssql user..."
