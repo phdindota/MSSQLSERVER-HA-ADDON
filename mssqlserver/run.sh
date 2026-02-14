@@ -71,14 +71,36 @@ bashio::log.info "SA password validated successfully"
 # ==============================================================================
 bashio::log.info "Creating data directories..."
 
-mkdir -p "${MSSQL_DATA_DIR}"
-mkdir -p "${MSSQL_LOG_DIR}"
-mkdir -p "${MSSQL_BACKUP_DIR}"
+if ! mkdir -p "${MSSQL_DATA_DIR}"; then
+    bashio::log.error "Failed to create data directory: ${MSSQL_DATA_DIR}"
+    bashio::exit.nok "Failed to create data directory"
+fi
+
+if ! mkdir -p "${MSSQL_LOG_DIR}"; then
+    bashio::log.error "Failed to create log directory: ${MSSQL_LOG_DIR}"
+    bashio::exit.nok "Failed to create log directory"
+fi
+
+if ! mkdir -p "${MSSQL_BACKUP_DIR}"; then
+    bashio::log.error "Failed to create backup directory: ${MSSQL_BACKUP_DIR}"
+    bashio::exit.nok "Failed to create backup directory"
+fi
 
 # Set ownership to mssql user (UID 10001) so sqlservr can read/write
-chown -R mssql:root "${MSSQL_DATA_DIR}"
-chown -R mssql:root "${MSSQL_LOG_DIR}"
-chown -R mssql:root "${MSSQL_BACKUP_DIR}"
+if ! chown -R mssql:root "${MSSQL_DATA_DIR}"; then
+    bashio::log.error "Failed to set ownership on data directory: ${MSSQL_DATA_DIR}"
+    bashio::exit.nok "Failed to set directory ownership"
+fi
+
+if ! chown -R mssql:root "${MSSQL_LOG_DIR}"; then
+    bashio::log.error "Failed to set ownership on log directory: ${MSSQL_LOG_DIR}"
+    bashio::exit.nok "Failed to set directory ownership"
+fi
+
+if ! chown -R mssql:root "${MSSQL_BACKUP_DIR}"; then
+    bashio::log.error "Failed to set ownership on backup directory: ${MSSQL_BACKUP_DIR}"
+    bashio::exit.nok "Failed to set directory ownership"
+fi
 
 bashio::log.info "Data directories created successfully"
 
