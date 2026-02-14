@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.2.2
+
+### Fixed
+- **Docker Build**: Fixed GPG key error during ODBC driver installation by properly linking the GPG keyring with `signed-by` clause and using the correct Ubuntu 24.04 (noble) repository instead of Ubuntu 22.04 (jammy)
+
 ## 1.2.1
 
 ### Fixed
