@@ -70,17 +70,29 @@ bashio::log.info "Creating data directories..."
 
 if [ ! -d "${MSSQL_DATA_DIR}" ]; then
     bashio::log.info "Creating data directory: ${MSSQL_DATA_DIR}"
-    mkdir -p "${MSSQL_DATA_DIR}"
+    if ! mkdir -p "${MSSQL_DATA_DIR}" 2>/dev/null; then
+        bashio::log.error "Failed to create data directory: ${MSSQL_DATA_DIR}"
+        bashio::log.error "Please ensure the /share directory has correct permissions for the mssql user (UID 10001)"
+        bashio::exit.nok "Failed to create data directory"
+    fi
 fi
 
 if [ ! -d "${MSSQL_LOG_DIR}" ]; then
     bashio::log.info "Creating log directory: ${MSSQL_LOG_DIR}"
-    mkdir -p "${MSSQL_LOG_DIR}"
+    if ! mkdir -p "${MSSQL_LOG_DIR}" 2>/dev/null; then
+        bashio::log.error "Failed to create log directory: ${MSSQL_LOG_DIR}"
+        bashio::log.error "Please ensure the /share directory has correct permissions for the mssql user (UID 10001)"
+        bashio::exit.nok "Failed to create log directory"
+    fi
 fi
 
 if [ ! -d "${MSSQL_BACKUP_DIR}" ]; then
     bashio::log.info "Creating backup directory: ${MSSQL_BACKUP_DIR}"
-    mkdir -p "${MSSQL_BACKUP_DIR}"
+    if ! mkdir -p "${MSSQL_BACKUP_DIR}" 2>/dev/null; then
+        bashio::log.error "Failed to create backup directory: ${MSSQL_BACKUP_DIR}"
+        bashio::log.error "Please ensure the /share directory has correct permissions for the mssql user (UID 10001)"
+        bashio::exit.nok "Failed to create backup directory"
+    fi
 fi
 
 bashio::log.info "Data directories created successfully"
